@@ -1,3 +1,5 @@
 flask
 requests
 openai
+gunicorn
+reportlab
