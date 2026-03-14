@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>OpenRouter Chat</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(circle at top, rgba(255, 255, 255, 0.85), rgba(221, 227, 239, 0.55), rgba(195, 207, 226, 0.85));
+            color: #2b3a4b;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+            animation: fadeIn 1s ease-in-out;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        body.dark-mode {
+            background: radial-gradient(circle at top, rgba(20, 20, 30, 0.95), rgba(10, 10, 20, 0.85), rgba(5, 5, 15, 0.95));
+            color: #e0e0e0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 50px 45px;
+            border-radius: 20px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.12);
+            position: relative;
+            animation: slideUp 0.8s ease-out;
+            transition: background 0.3s;
+        }
+
+        body.dark-mode .container {
+            background: rgba(30, 30, 40, 0.95);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        header {
+            text-align: center;
+            margin-bottom: 42px;
+            border-bottom: 2px solid rgba(102, 126, 234, 0.25);
+            padding-bottom: 24px;
+        }
+        h1 {
+            color: #1f2a3a;
+            font-size: 3.2rem;
+            margin: 0;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+        .subtitle {
+            color: #6b7c8a;
+            font-size: 1.2rem;
+            margin-top: 10px;
+            font-weight: 300;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .mode-btn {
+            padding: 8px 16px;
+            background: #e9ecef;
+            color: #495057;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .mode-btn.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+        }
+        .mode-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .theme-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .chat-section {
+            margin-top: 60px;
+        }
+        .options {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+        .options button {
+            padding: 12px 20px;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .options button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+        .options button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(40, 167, 69, 0.2);
+        }
+        .chat-form {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            align-items: center;
+        }
+        .chat-form input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .chat-form input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            outline: none;
+        }
+        .chat-form button {
+            padding: 15px 25px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .chat-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        .chat-form button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(102, 126, 234, 0.2);
+        }
+        .history {
+            max-height: 500px;
+            overflow-y: auto;
+            border: 2px solid #ecf0f1;
+            border-radius: 12px;
+            padding: 20px;
+            background: #fafbfc;
+        }
+        .chat-entry {
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            border-left: 6px solid #667eea;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        .chat-entry strong {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        .chat-entry em {
+            color: #95a5a6;
+            font-size: 0.9em;
+            font-style: normal;
+        }
+        .about-section {
+            margin-top: 50px;
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            border: 1px solid #dee2e6;
+        }
+
+        body.dark-mode .about-section {
+            background: linear-gradient(145deg, #1a1a1a, #0e0e0e);
+            border: 1px solid #333;
+        }
+        .about-section h2 {
+            color: #2c3e50;
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            font-weight: 300;
+        }
+        .about-section p {
+            color: #5a6c7d;
+            font-size: 1.1em;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        .test-generator {
+            margin-top: 50px;
+            padding: 35px;
+            background: linear-gradient(145deg, #f4f6ff, #eef2ff);
+            border-radius: 18px;
+            border: 1px solid #dbe4ff;
+        }
+
+        body.dark-mode .test-generator {
+            background: linear-gradient(145deg, #2a2a3a, #1e1e2e);
+            border: 1px solid #444;
+        }
+
+        .student-section {
+            margin-top: 50px;
+            padding: 35px;
+            background: linear-gradient(145deg, #fff9c4, #fff59d);
+            border-radius: 18px;
+            border: 1px solid #ffeb3b;
+        }
+
+        body.dark-mode .student-section {
+            background: linear-gradient(145deg, #3a3a1a, #2e2e0e);
+            border: 1px solid #555;
+        }
+
+        .quick-tips {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            border: 1px solid #ddd;
+        }
+
+        body.dark-mode .quick-tips {
+            background: rgba(60, 60, 40, 0.8);
+            border: 1px solid #666;
+        }
+        .test-generator h2 {
+            margin-top: 0;
+            font-weight: 400;
+        }
+        .test-generator .subtitle {
+            margin-top: 6px;
+            margin-bottom: 26px;
+            font-weight: 300;
+        }
+        .test-form {
+            display: grid;
+            gap: 16px;
+        }
+        .test-form label {
+            display: block;
+            font-size: 0.9rem;
+            color: #4b5563;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .test-form textarea {
+            width: 100%;
+            min-height: 140px;
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(102, 126, 234, 0.4);
+            resize: vertical;
+            font-size: 14px;
+        }
+        .test-form .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+        .test-form .field input,
+        .test-form .field select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(102, 126, 234, 0.4);
+            border-radius: 14px;
+            font-size: 14px;
+        }
+        .test-form button {
+            max-width: 280px;
+            padding: 14px 22px;
+            background: linear-gradient(45deg, #667eea, #5f7aca);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 700;
+            transition: all 0.25s ease;
+        }
+        .test-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.25);
+        }
+        .test-result {
+            margin-top: 26px;
+        }
+        .test-card {
+            background: white;
+            border-radius: 18px;
+            border: 1px solid rgba(102, 126, 234, 0.18);
+            padding: 22px;
+            box-shadow: 0 8px 22px rgba(102, 126, 234, 0.08);
+        }
+        .test-card h3 {
+            margin: 0 0 10px;
+            font-weight: 600;
+        }
+        .test-card .meta {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-bottom: 18px;
+        }
+        .test-card ol {
+            padding-left: 18px;
+        }
+        .test-card li {
+            margin-bottom: 14px;
+        }
+        .test-card li strong {
+            display: block;
+            margin-bottom: 6px;
+        }
+        .test-card li .options {
+            margin-top: 6px;
+            margin-bottom: 6px;
+        }
+        .test-card li .options span {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.12);
+            padding: 5px 10px;
+            border-radius: 12px;
+            margin-right: 8px;
+            font-size: 0.9rem;
+        }
+        .test-card .download {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 16px;
+            padding: 10px 16px;
+            background: linear-gradient(45deg, #4f46e5, #667eea);
+            color: white;
+            border-radius: 14px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.25s ease;
+        }
+        .test-card .download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 18px rgba(102, 126, 234, 0.3);
+        }
+
+        .saved-tests {
+            margin-top: 50px;
+            padding: 35px;
+            background: linear-gradient(145deg, #fff3cd, #ffeaa7);
+            border-radius: 18px;
+            border: 1px solid #ffecb3;
+        }
+
+        body.dark-mode .saved-tests {
+            background: linear-gradient(145deg, #3a2a1a, #2e1e0e);
+            border: 1px solid #555;
+        }
+
+        .question-bank {
+            margin-top: 50px;
+            padding: 35px;
+            background: linear-gradient(145deg, #e8f5e8, #c8e6c9);
+            border-radius: 18px;
+            border: 1px solid #a5d6a7;
+        }
+
+        body.dark-mode .question-bank {
+            background: linear-gradient(145deg, #1a2a1a, #0e1e0e);
+            border: 1px solid #4a5a4a;
+        }
+        .saved-tests h2 {
+            margin-top: 0;
+            font-weight: 400;
+        }
+        .saved-test-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .saved-test-item .info {
+            flex: 1;
+        }
+        .saved-test-item .actions {
+            display: flex;
+            gap: 10px;
+        }
+        .saved-test-item button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .load-btn {
+            background: #28a745;
+            color: white;
+        }
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .bank-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            position: relative;
+        }
+
+        body.dark-mode .bank-item {
+            background: #3a3a3a;
+            border: 1px solid #555;
+        }
+
+        .delete-q-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .delete-q-btn:hover {
+            background: #c82333;
+        }
+
+        .student-test-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        body.dark-mode .student-test-item {
+            background: #3a3a3a;
+            border: 1px solid #555;
+        }
+
+        .take-exam-btn {
+            padding: 10px 16px;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.25s ease;
+        }
+        .take-exam-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .preview-btn {
+            padding: 10px 16px;
+            background: linear-gradient(45deg, #f59e0b, #d97706);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.25s ease;
+        }
+        .preview-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 18px rgba(245, 158, 11, 0.3);
+        }
+
+        .save-btn {
+            padding: 10px 16px;
+            background: linear-gradient(45deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.25s ease;
+            margin-left: 10px;
+        }
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 18px rgba(16, 185, 129, 0.3);
+        }
+
+        .take-test-btn {
+            padding: 10px 16px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.25s ease;
+            margin-left: 10px;
+        }
+        .take-test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 18px rgba(255, 107, 107, 0.3);
+        }
+
+        .export-json-btn {
+            padding: 10px 16px;
+            background: linear-gradient(45deg, #9c88ff, #6c5ce7);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.25s ease;
+        }
+        .export-json-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 18px rgba(156, 136, 255, 0.3);
+        }
+
+        .save-q-btn {
+            margin-top: 8px;
+            padding: 6px 12px;
+            background: linear-gradient(45deg, #17a2b8, #138496);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.25s ease;
+        }
+        .save-q-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 10px rgba(23, 162, 184, 0.3);
+        }
+
+        .modal {
+            display: block;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease;
+        }
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 20px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80%;
+            overflow-y: auto;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+            transition: background 0.3s;
+        }
+
+        body.dark-mode .modal-content {
+            background-color: #2a2a2a;
+            color: #e0e0e0;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: black;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #timer {
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #e53e3e;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            transition: width 1s linear;
+        }
+
+        #submit-test {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        #submit-test:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .question-item {
+            margin-bottom: 20px;
+        }
+        .question-item strong {
+            display: block;
+            margin-bottom: 10px;
+        }
+        .question-item input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .success-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            animation: bounceIn 0.5s ease, fadeOut 2.5s 0.5s ease-in-out;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+            70% { transform: translate(-50%, -50%) scale(0.9); }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>OpenRouter AI Assistant</h1>
+            <p class="subtitle">Advanced Conversational AI Powered by GPT-4o</p>
+            <div class="mode-selector">
+                <button id="faculty-mode" class="mode-btn active" onclick="setMode('faculty')">👨‍🏫 Faculty Mode</button>
+                <button id="student-mode" class="mode-btn" onclick="setMode('student')">👨‍🎓 Student Mode</button>
+            </div>
+            <button id="theme-toggle" class="theme-btn">🌙 Dark Mode</button>
+        </header>
+        <div class="chat-section">
+            <div id="options" class="options">
+                <button onclick="newChat()">Start New Conversation</button>
+                <button onclick="downloadPDF()">Export Report</button>
+            </div>
+            <form class="chat-form" onsubmit="sendMessage(event)">
+                <input type="text" id="prompt" placeholder="Enter your professional inquiry..." required>
+                <button type="submit">Send Message</button>
+            </form>
+            <div id="history" class="history"></div>
+        </div>
+
+        <div class="student-section hidden">
+            <h2>🎓 Student Exam Portal</h2>
+            <p class="subtitle">Select a test and take your exam with detailed explanations!</p>
+            <div id="student-test-list"></div>
+            <div class="quick-tips">
+                <h3>💡 Quick Study Tips</h3>
+                <ul>
+                    <li>Read questions carefully before answering.</li>
+                    <li>Manage your time wisely during the exam.</li>
+                    <li>Review explanations to learn from mistakes.</li>
+                    <li>Practice regularly to improve your scores!</li>
+                </ul>
+            </div>
+        </div>
+        <div class="test-generator">
+            <h2>AI Test Generator</h2>
+            <p class="subtitle">Generate MCQ-based tests aligned to your syllabus and chosen difficulty.</p>
+            <form class="test-form" onsubmit="generateTest(event)">
+                <label for="syllabus">Syllabus / Topic</label>
+                <textarea id="syllabus" placeholder="Enter your syllabus or topic outline..." required></textarea>
+
+                <div class="row">
+                    <div class="field">
+                        <label for="difficulty">Difficulty</label>
+                        <select id="difficulty">
+                            <option value="easy">Easy</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="questionCount">Questions</label>
+                        <input type="number" id="questionCount" min="3" max="40" value="10">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="field">
+                        <label for="subject">Subject</label>
+                        <input type="text" id="subject" placeholder="e.g., Computer Science" required>
+                    </div>
+                    <div class="field">
+                        <label for="examDate">Exam Date</label>
+                        <input type="date" id="examDate" required>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="field">
+                        <label for="duration">Duration (minutes)</label>
+                        <input type="number" id="duration" min="30" max="300" value="120" required>
+                    </div>
+                    <div class="field">
+                        <label for="collegeName">College Name</label>
+                        <input type="text" id="collegeName" placeholder="e.g., XYZ University" required>
+                    </div>
+                </div>
+
+                <button type="submit">Generate Test</button>
+            </form>
+
+            <div id="test-result" class="test-result"></div>
+        </div>
+
+        <div class="question-bank">
+            <h2>Question Bank</h2>
+            <p class="subtitle">Save and manage your favorite questions for future use.</p>
+            <div id="question-bank-list"></div>
+        </div>
+
+        <div class="saved-tests">
+            <h2>My Tests</h2>
+            <div id="saved-tests-list"></div>
+        </div>
+        <div class="about-section">
+            <h2>About Our AI Assistant</h2>
+            <p>Experience cutting-edge conversational AI technology with our OpenRouter-powered assistant. Built for professionals, this platform offers intelligent responses, secure authentication, and comprehensive conversation management. Whether you're brainstorming ideas, seeking expert advice, or conducting research, our GPT-4o powered system delivers reliable, context-aware interactions tailored to your needs.</p>
+        </div>
+
+        <!-- Preview Modal -->
+        <div id="preview-modal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close" onclick="closePreview()">&times;</span>
+                <h2>Test Preview</h2>
+                <div id="preview-content"></div>
+            </div>
+        </div>
+
+        <!-- Take Test Modal -->
+        <div id="take-test-modal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close" onclick="closeTakeTest()">&times;</span>
+                <h2>Take Test Online</h2>
+                <div id="timer">Time Left: <span id="time-left">00:00</span></div>
+                <div id="test-questions"></div>
+                <button id="submit-test" onclick="submitTest()">Submit Test</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        let history = loadHistory();
+
+        function loadHistory() {
+            const stored = localStorage.getItem('openrouter_chat_history');
+            if (!stored) return [];
+            try {
+                return JSON.parse(stored);
+            } catch {
+                return [];
+            }
+        }
+
+        function saveHistory() {
+            localStorage.setItem('openrouter_chat_history', JSON.stringify(history));
+        }
+
+        function sendMessage(event) {
+            event.preventDefault();
+            const prompt = document.getElementById('prompt').value;
+            if (!prompt.trim()) return;
+            document.getElementById('prompt').value = '';
+
+            fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const response = data.response;
+                const chatEntry = { prompt, response, timestamp: new Date().toISOString() };
+                history.push(chatEntry);
+                saveHistory();
+                displayHistory();
+            });
+        }
+
+        function displayHistory() {
+            const historyDiv = document.getElementById('history');
+            historyDiv.innerHTML = '';
+
+            if (history.length === 0) {
+                historyDiv.innerHTML = '<p style="text-align: center; color: #95a5a6; font-style: italic;">No conversations yet. Start a professional dialogue above.</p>';
+                return;
+            }
+
+            history.forEach(chat => {
+                const div = document.createElement('div');
+                div.className = 'chat-entry';
+                div.innerHTML = `
+                    <p><strong>Query:</strong> ${chat.prompt}</p>
+                    <p><strong>AI Response:</strong> ${chat.response}</p>
+                    <p><em>Timestamp: ${new Date(chat.timestamp).toLocaleString()}</em></p>
+                `;
+                historyDiv.appendChild(div);
+            });
+        }
+
+        function newChat() {
+            history = [];
+            saveHistory();
+            displayHistory();
+        }
+
+        function downloadPDF() {
+            fetch('/generate_pdf', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ history })
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'chat_history.pdf';
+                a.click();
+            });
+        }
+
+        // Test generation state
+        let latestTest = null;
+        let currentTest = null;
+
+        async function generateTest(event) {
+            event.preventDefault();
+            const syllabus = document.getElementById('syllabus').value.trim();
+            const difficulty = document.getElementById('difficulty').value;
+            const count = parseInt(document.getElementById('questionCount').value, 10) || 10;
+            const subject = document.getElementById('subject').value.trim();
+            const examDate = document.getElementById('examDate').value;
+            const duration = parseInt(document.getElementById('duration').value, 10);
+            const collegeName = document.getElementById('collegeName').value.trim();
+
+            if (!syllabus || !subject || !examDate || !collegeName) return;
+
+            const resultDiv = document.getElementById('test-result');
+            resultDiv.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <div class="spinner"></div>
+                    <p style="color: #5a67d8; font-weight: 600; margin-top: 20px;">Generating your test... Please hold on.</p>
+                </div>
+            `;
+
+            const response = await fetch('/api/tests', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ syllabus, difficulty, count, subject, examDate, duration, collegeName })
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                resultDiv.innerHTML = `<p style="color: #e53e3e; text-align: center;">Error: ${data.error || 'Unable to generate test.'}</p>`;
+                return;
+            }
+
+            latestTest = data;
+            renderTest(data);
+            showSuccessAnimation();
+        }
+
+        function showSuccessAnimation() {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-animation';
+            successDiv.innerHTML = '🎉 Test Generated Successfully! 🎉';
+            document.body.appendChild(successDiv);
+            setTimeout(() => {
+                successDiv.remove();
+            }, 3000);
+        }
+
+        function renderTest(test) {
+            const resultDiv = document.getElementById('test-result');
+            if (!test) {
+                resultDiv.innerHTML = '';
+                return;
+            }
+
+            const questions = test.questions || [];
+            const created = new Date(test.createdAt).toLocaleString();
+
+            const htmlQuestions = questions.map((q, idx) => {
+                const options = (q.options || []).map(opt => `<span>${opt}</span>`).join('');
+                return `
+                    <li>
+                        <strong>${idx + 1}. ${q.question}</strong>
+                        <div class="options">${options}</div>
+                        <div><em>Answer: ${q.answer}</em></div>
+                        <button class="save-q-btn" onclick="saveQuestionToBank(${idx})">💾 Save to Bank</button>
+                    </li>
+                `;
+            }).join('');
+
+            const sets = ['A', 'B', 'C', 'D'];
+            const questionButtons = sets.map(set => `<a href="#" class="download" onclick="downloadTestPDF(event, 'question', '${set}')">📄 Set ${set}</a>`).join('');
+            const answerButtons = sets.map(set => `<a href="#" class="download" onclick="downloadTestPDF(event, 'answer', '${set}')">🔑 Set ${set}</a>`).join('');
+
+            resultDiv.innerHTML = `
+                <div class="test-card">
+                    <h3>Generated Test</h3>
+                    <div class="meta">Created: ${created} • Difficulty: ${test.difficulty} • Questions: ${questions.length}</div>
+                    <ol>${htmlQuestions}</ol>
+                    <div style="margin-top: 16px;">
+                        <button class="preview-btn" onclick="previewTest()">👁️ Preview Test</button>
+                        <button class="save-btn" onclick="saveTest()">💾 Save Test</button>
+                        <button class="take-test-btn" onclick="takeTestOnline()">🎯 Take Test Online</button>
+                    </div>
+                    <div style="margin-top: 16px;">
+                        <h4>Download Question Papers</h4>
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap;">${questionButtons}</div>
+                    </div>
+                    <div style="margin-top: 16px;">
+                        <h4>Download Answer Keys</h4>
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap;">${answerButtons}</div>
+                    </div>
+                    <div style="margin-top: 16px;">
+                        <button class="export-json-btn" onclick="exportToJSON()">📤 Export as JSON</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function downloadTestPDF(event, type, set) {
+            if (event) event.preventDefault();
+            if (!latestTest) return;
+            fetch('/generate_pdf', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ test: latestTest, type, set })
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `ai_test_${type}_${set}.pdf`;
+                a.click();
+            });
+        }
+
+        function previewTest() {
+            if (!latestTest) return;
+            const modal = document.getElementById('preview-modal');
+            const content = document.getElementById('preview-content');
+            const sets = latestTest.sets || {};
+            let html = '<h3>Test Preview (Set A)</h3>';
+            const questions = sets['A'] || [];
+            html += '<ol>';
+            questions.forEach((q, idx) => {
+                const options = (q.options || []).map(opt => `<li>${opt}</li>`).join('');
+                html += `<li><strong>${idx + 1}. ${q.question}</strong><ul>${options}</ul></li>`;
+            });
+            html += '</ol>';
+            content.innerHTML = html;
+            modal.classList.remove('hidden');
+        }
+
+        function closePreview() {
+            document.getElementById('preview-modal').classList.add('hidden');
+        }
+
+        let testTimer;
+        let timeLeft;
+
+        function takeTestOnline() {
+            if (!latestTest) return;
+            currentTest = latestTest;
+            const modal = document.getElementById('take-test-modal');
+            const questionsDiv = document.getElementById('test-questions');
+            const sets = latestTest.sets || {};
+            const questions = sets['A'] || []; // Use Set A for taking test
+            timeLeft = latestTest.duration * 60; // duration in seconds
+
+            let html = '<div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>';
+            html += '<form id="test-form">';
+            questions.forEach((q, idx) => {
+                const options = (q.options || []).map((opt, optIdx) => `
+                    <label>
+                        <input type="radio" name="q${idx}" value="${optIdx}"> ${opt}
+                    </label><br>
+                `).join('');
+                html += `
+                    <div class="question-item">
+                        <strong>${idx + 1}. ${q.question}</strong>
+                        ${options}
+                    </div>
+                `;
+            });
+            html += '</form>';
+            questionsDiv.innerHTML = html;
+
+            modal.classList.remove('hidden');
+            startTimer();
+        }
+
+        function startTimer() {
+            const timerSpan = document.getElementById('time-left');
+            const progressFill = document.getElementById('progress-fill');
+            const totalTime = latestTest.duration * 60;
+            testTimer = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerSpan.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                const progress = ((totalTime - timeLeft) / totalTime) * 100;
+                progressFill.style.width = `${progress}%`;
+                if (timeLeft <= 0) {
+                    clearInterval(testTimer);
+                    submitTest();
+                }
+            }, 1000);
+        }
+
+        function submitTest() {
+            clearInterval(testTimer);
+            const form = document.getElementById('test-form');
+            const formData = new FormData(form);
+            const answers = {};
+            for (let [key, value] of formData.entries()) {
+                answers[key] = parseInt(value);
+            }
+
+            const sets = currentTest.sets || {};
+            const questions = sets['A'] || [];
+            let score = 0;
+            let results = '<h3>Test Results</h3><ol>';
+            questions.forEach((q, idx) => {
+                const userAnswer = answers[`q${idx}`];
+                const correct = q.options[userAnswer] === q.answer;
+                if (correct) score++;
+                const explanation = q.explanation || 'No explanation available.';
+                results += `<li><strong>${idx + 1}. ${q.question}</strong><br>Your answer: ${q.options[userAnswer] || 'Not answered'}<br>Correct: ${q.answer}<br>${correct ? '✅ Correct' : '❌ Wrong'}<br><em>Explanation: ${explanation}</em></li>`;
+            });
+            results += `</ol><h4>Score: ${score}/${questions.length} (${Math.round(score/questions.length*100)}%)</h4>`;
+            if (currentMode === 'student') {
+                results += '<p>Great job! Keep learning! 📚</p>';
+            }
+
+            document.getElementById('test-questions').innerHTML = results;
+            document.getElementById('submit-test').style.display = 'none';
+        }
+
+        function closeTakeTest() {
+            clearInterval(testTimer);
+            document.getElementById('take-test-modal').classList.add('hidden');
+        }
+
+        function exportToJSON() {
+            if (!latestTest) return;
+            const dataStr = JSON.stringify(latestTest, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            const exportFileDefaultName = 'test_data.json';
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+
+        // Saved Tests
+        let savedTests = loadSavedTests();
+
+        function loadSavedTests() {
+            const stored = localStorage.getItem('saved_tests');
+            return stored ? JSON.parse(stored) : [];
+        }
+
+        function saveSavedTests() {
+            localStorage.setItem('saved_tests', JSON.stringify(savedTests));
+        }
+
+        function saveTest() {
+            if (!latestTest) return;
+            const testName = prompt('Enter a name for this test:');
+            if (!testName) return;
+            latestTest.name = testName;
+            savedTests.push(latestTest);
+            saveSavedTests();
+            displaySavedTests();
+            alert('Test saved!');
+        }
+
+        function displaySavedTests() {
+            const listDiv = document.getElementById('saved-tests-list');
+            if (savedTests.length === 0) {
+                listDiv.innerHTML = '<p>No saved tests yet.</p>';
+                return;
+            }
+            listDiv.innerHTML = savedTests.map((test, idx) => `
+                <div class="saved-test-item">
+                    <div class="info">
+                        <strong>${test.name}</strong> - ${test.subject} (${test.difficulty}) - ${new Date(test.createdAt).toLocaleDateString()}
+                    </div>
+                    <div class="actions">
+                        <button class="load-btn" onclick="loadSavedTest(${idx})">Load</button>
+                        <button class="delete-btn" onclick="deleteTest(${idx})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadSavedTest(idx) {
+            latestTest = savedTests[idx];
+            renderTest(latestTest);
+        }
+
+        function deleteTest(idx) {
+            if (confirm('Are you sure you want to delete this test?')) {
+                savedTests.splice(idx, 1);
+                saveSavedTests();
+                displaySavedTests();
+            }
+        }
+
+        // Question Bank
+        let questionBank = loadQuestionBank();
+
+        function loadQuestionBank() {
+            const stored = localStorage.getItem('question_bank');
+            return stored ? JSON.parse(stored) : [];
+        }
+
+        function saveQuestionBank() {
+            localStorage.setItem('question_bank', JSON.stringify(questionBank));
+        }
+
+        function saveQuestionToBank(idx) {
+            if (!latestTest || !latestTest.questions) return;
+            const question = latestTest.questions[idx];
+            questionBank.push(question);
+            saveQuestionBank();
+            displayQuestionBank();
+            alert('Question saved to bank!');
+        }
+
+        function displayQuestionBank() {
+            const listDiv = document.getElementById('question-bank-list');
+            if (questionBank.length === 0) {
+                listDiv.innerHTML = '<p>No questions in bank yet.</p>';
+                return;
+            }
+            listDiv.innerHTML = questionBank.map((q, idx) => {
+                const options = (q.options || []).map(opt => `<span>${opt}</span>`).join('');
+                return `
+                    <div class="bank-item">
+                        <strong>${q.question}</strong>
+                        <div class="options">${options}</div>
+                        <div><em>Answer: ${q.answer}</em></div>
+                        <button class="delete-q-btn" onclick="deleteQuestionFromBank(${idx})">🗑️ Delete</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function deleteQuestionFromBank(idx) {
+            if (confirm('Delete this question from bank?')) {
+                questionBank.splice(idx, 1);
+                saveQuestionBank();
+                displayQuestionBank();
+            }
+        }
+
+        // Initialize UI
+        displayHistory();
+        displaySavedTests();
+        displayQuestionBank();
+
+        let currentMode = localStorage.getItem('mode') || 'faculty';
+        setMode(currentMode);
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️ Light Mode';
+        }
+
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            const isDark = body.classList.contains('dark-mode');
+            themeToggle.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+
+        function setMode(mode) {
+            currentMode = mode;
+            localStorage.setItem('mode', mode);
+            document.getElementById('faculty-mode').classList.toggle('active', mode === 'faculty');
+            document.getElementById('student-mode').classList.toggle('active', mode === 'student');
+
+            document.querySelector('.test-generator').classList.toggle('hidden', mode === 'student');
+            document.querySelector('.question-bank').classList.toggle('hidden', mode === 'student');
+            document.querySelector('.saved-tests').classList.toggle('hidden', mode === 'student');
+            document.querySelector('.student-section').classList.toggle('hidden', mode === 'faculty');
+
+            if (mode === 'student') {
+                displayStudentTests();
+            }
+        }
+
+        function displayStudentTests() {
+            const listDiv = document.getElementById('student-test-list');
+            if (savedTests.length === 0) {
+                listDiv.innerHTML = '<p>No tests available. Ask your faculty to create some!</p>';
+                return;
+            }
+            listDiv.innerHTML = savedTests.map((test, idx) => `
+                <div class="student-test-item">
+                    <div class="info">
+                        <strong>${test.name}</strong> - ${test.subject} (${test.difficulty}) - ${new Date(test.createdAt).toLocaleDateString()}
+                    </div>
+                    <div class="actions">
+                        <button class="take-exam-btn" onclick="takeStudentTest(${idx})">📝 Take Exam</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function takeStudentTest(idx) {
+            const test = savedTests[idx];
+            currentTest = test;
+            const modal = document.getElementById('take-test-modal');
+            const questionsDiv = document.getElementById('test-questions');
+            const sets = test.sets || {};
+            const questions = sets['A'] || []; // Use Set A
+            timeLeft = test.duration * 60;
+
+            let html = '<div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>';
+            html += '<form id="test-form">';
+            questions.forEach((q, idx) => {
+                const options = (q.options || []).map((opt, optIdx) => `
+                    <label>
+                        <input type="radio" name="q${idx}" value="${optIdx}"> ${opt}
+                    </label><br>
+                `).join('');
+                html += `
+                    <div class="question-item">
+                        <strong>${idx + 1}. ${q.question}</strong>
+                        ${options}
+                    </div>
+                `;
+            });
+            html += '</form>';
+            questionsDiv.innerHTML = html;
+
+            modal.classList.remove('hidden');
+            startTimer();
+        }
+    </script>
+</body>
+</html>
